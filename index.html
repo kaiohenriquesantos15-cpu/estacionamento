@@ -1,0 +1,1944 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Estacionamento de Veículos</title>
+    <style>
+        :root {
+            --white: #ffffff;
+            --bg: #f7f8fa;
+            --surface: #ffffff;
+            --border: #e8eaed;
+            --border-strong: #d0d4dc;
+            --text: #1a1d23;
+            --text-secondary: #5c6370;
+            --text-muted: #8b92a0;
+            --accent: #0d9488;
+            --accent-hover: #0f766e;
+            --accent-soft: #ccfbf1;
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --info: #2563eb;
+            --info-bg: #eff6ff;
+            --preferencial: #ea580c;
+            --preferencial-bg: #fff7ed;
+            --idoso: #7c3aed;
+            --idoso-bg: #f5f3ff;
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--white);
+            box-shadow: 0 0 40px rgba(0,0,0,0.06);
+        }
+
+        .topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .brand-text h1 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+
+        .brand-text p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: -1px;
+        }
+
+        .topbar-note {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            max-width: 420px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-item {
+            padding: 16px 20px;
+            border-right: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-item .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-item .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.03em;
+        }
+
+        .stat-item .value.accent {
+            color: var(--accent);
+        }
+
+        .tabs-nav {
+            display: flex;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            gap: 0;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            padding: 14px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            white-space: nowrap;
+            transition: color 0.15s, border-color 0.15s;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            color: var(--accent);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .main {
+            flex: 1;
+            padding: 28px;
+            background: var(--bg);
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeUp 0.2s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            background: #fafbfc;
+        }
+
+        .card-body {
+            padding: 18px;
+        }
+
+        .card-body.compact {
+            padding: 14px;
+        }
+
+        .layout-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .layout-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .layout-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            background: var(--white);
+            color: var(--text);
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            margin: 2px 4px 2px 0;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #b45309;
+        }
+
+        .btn-ghost {
+            background: var(--bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.78rem;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .message {
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            margin-top: 12px;
+            display: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: var(--success-bg);
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .message.error {
+            background: var(--danger-bg);
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .message.info {
+            background: var(--info-bg);
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .info-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 0.85rem;
+            line-height: 1.65;
+        }
+
+        .info-box .info-title {
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            margin: 3px 0;
+            color: var(--text-secondary);
+        }
+
+        .info-box strong {
+            color: var(--text);
+        }
+
+        .selected-banner {
+            background: var(--accent-soft);
+            border: 1px solid #99f6e4;
+            color: #0f766e;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .tempo-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .tempo-box .tempo-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .tempo-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .tempo-option input {
+            display: none;
+        }
+
+        .tempo-option label {
+            display: inline-block;
+            padding: 7px 14px;
+            background: var(--white);
+            border: 1px solid var(--border-strong);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: none;
+            letter-spacing: 0;
+            margin: 0;
+            transition: all 0.15s;
+        }
+
+        .tempo-option input:checked + label {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .valor-preview {
+            background: var(--success);
+            color: white;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            margin-top: 14px;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .valor-preview small {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-top: 3px;
+        }
+
+        .tempo-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: var(--white);
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            width: auto;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .legenda {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        .legenda span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legenda i {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+            border: 1.5px solid;
+        }
+
+        .parking-section {
+            margin-bottom: 24px;
+        }
+
+        .parking-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .parking-spots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: 10px;
+        }
+
+        .spot {
+            background: var(--white);
+            border: 1.5px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            min-height: 68px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .spot:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .spot.available {
+            background: var(--success-bg);
+            border-color: #6ee7b7;
+        }
+
+        .spot.occupied {
+            background: var(--danger-bg);
+            border-color: #fca5a5;
+        }
+
+        .spot.preferencial {
+            background: var(--preferencial-bg);
+            border-color: #fdba74;
+        }
+
+        .spot.idoso {
+            background: var(--idoso-bg);
+            border-color: #c4b5fd;
+        }
+
+        .spot.occupied.preferencial,
+        .spot.occupied.idoso {
+            background: var(--danger-bg);
+            border-color: #fca5a5;
+        }
+
+        .spot-number {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .spot-status {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 0.82rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #fafbfc;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.68rem;
+            letter-spacing: 0.04em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #fafbfc;
+        }
+
+        .precos-box {
+            background: var(--accent);
+            color: white;
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .precos-box h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.85;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .precos-box .preco-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.95rem;
+        }
+
+        .precos-box .preco-row:last-child {
+            border-bottom: none;
+        }
+
+        .precos-box .preco-row span:last-child {
+            font-weight: 700;
+        }
+
+        .report-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .report-chip {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        @media (max-width: 1000px) {
+            .stats-strip {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .stat-item:nth-child(3) {
+                border-right: none;
+            }
+            .layout-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .topbar {
+                padding: 12px 14px;
+                height: auto;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .topbar-note {
+                display: none;
+            }
+            .stats-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stat-item {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .main {
+                padding: 16px;
+            }
+            .tempo-input-group {
+                grid-template-columns: 1fr;
+            }
+            .layout-3 {
+                grid-template-columns: 1fr;
+            }
+            .parking-spots {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            .tabs-nav {
+                padding: 0 8px;
+            }
+            .tab-btn {
+                padding: 12px 12px;
+                font-size: 0.78rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon">🚗</div>
+                <div class="brand-text">
+                    <h1>Sistema de Estacionamento</h1>
+                    <p>Controle de vagas, clientes e tarifas</p>
+                </div>
+            </div>
+            <div class="topbar-note">
+                Front-end · JS · localStorage (clientes / veículos / vagas / movimentações / preços)
+            </div>
+        </header>
+
+        <div class="stats-strip" id="stats"></div>
+
+        <nav class="tabs-nav">
+            <button class="tab-btn active" onclick="showTab('vagas')">🅿️ Vagas</button>
+            <button class="tab-btn" onclick="showTab('entrada')">✅ Entrada</button>
+            <button class="tab-btn" onclick="showTab('saida')">❌ Saída</button>
+            <button class="tab-btn" onclick="showTab('clientes')">👥 Clientes</button>
+            <button class="tab-btn" onclick="showTab('veiculos')">🚙 Veículos</button>
+            <button class="tab-btn" onclick="showTab('precos')">💰 Preços</button>
+            <button class="tab-btn" onclick="showTab('relatorios')">📊 Relatórios</button>
+        </nav>
+
+        <main class="main">
+
+            <div id="vagas" class="tab-content active">
+                <div class="page-header">
+                    <h2>Mapa de Vagas</h2>
+                    <p>Clique em uma vaga livre para registrar entrada ou em uma ocupada para sair. Filtros por placa, status e tipo.</p>
+                </div>
+
+                <div class="legenda">
+                    <span><i style="background:#ecfdf5;border-color:#6ee7b7;"></i> Disponível</span>
+                    <span><i style="background:#fef2f2;border-color:#fca5a5;"></i> Ocupada</span>
+                    <span><i style="background:#fff7ed;border-color:#fdba74;"></i> Preferencial</span>
+                    <span><i style="background:#f5f3ff;border-color:#c4b5fd;"></i> Idoso</span>
+                </div>
+
+                <div class="filter-bar">
+                    <input type="text" id="filtroPlaca" placeholder="Filtrar por placa...">
+                    <select id="filtroStatus">
+                        <option value="">Todos os status</option>
+                        <option value="available">Disponíveis</option>
+                        <option value="occupied">Ocupadas</option>
+                    </select>
+                    <select id="filtroTipo">
+                        <option value="">Todos os tipos</option>
+                        <option value="normal">Normais</option>
+                        <option value="preferencial">Preferenciais</option>
+                        <option value="idoso">Idosos</option>
+                    </select>
+                    <button class="btn-primary" onclick="aplicarFiltroVagas()">🔍 Filtrar</button>
+                    <button class="btn-ghost" onclick="limparFiltroVagas()">✖ Limpar</button>
+                </div>
+
+                <div id="parkingSpotsContainer"></div>
+            </div>
+
+            <div id="entrada" class="tab-content">
+                <div class="page-header">
+                    <h2>Registrar Entrada</h2>
+                    <p>Informe a placa, escolha o tempo de permanência e confirme a vaga. Você pode pré-selecionar a vaga no mapa.</p>
+                </div>
+
+                <div class="layout-2">
+                    <div class="card">
+                        <div class="card-header">Dados da entrada</div>
+                        <div class="card-body">
+                            <div id="selectedSpotInfo" class="selected-banner" style="display:none;"></div>
+
+                            <div class="form-group">
+                                <label>Placa do Veículo *</label>
+                                <input type="text" id="placaEntrada" placeholder="ABC-1234" onblur="buscarVeiculoPorPlaca()">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Tipo de Vaga (se nenhuma pré-selecionada)</label>
+                                <select id="tipoVagaMovimento">
+                                    <option value="normal">Normal</option>
+                                    <option value="preferencial">Preferencial (PCD)</option>
+                                    <option value="idoso">Idoso</option>
+                                </select>
+                            </div>
+
+                            <div class="tempo-box">
+                                <div class="tempo-title">⏱️ Tempo de Permanência / Tarifa</div>
+                                <div class="form-group">
+                                    <label>Opção de Reserva</label>
+                                    <div class="tempo-chips" id="tempoOptionsEntrada">
+                                        <div class="tempo-option">
+                                            <input type="radio" name="tempoTipoEntrada" id="tempoPorHoraEntrada" value="hora" checked>
+                                            <label for="tempoPorHoraEntrada">⏰ Por Hora</label>
+                                        </div>
+                                        <div class="tempo-option">
+                                            <input type="radio" name="tempoTipoEntrada" id="tempoFixoEntrada" value="fixo">
+                                            <label for="tempoFixoEntrada">📅 Tempo Fixo</label>
+                                        </div>
+                                        <div class="tempo-option">
+                                            <input type="radio" name="tempoTipoEntrada" id="tempoPeriodoEntrada" value="periodo">
+                                            <label for="tempoPeriodoEntrada">📆 Período</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="opcaoHoraEntrada">
+                                    <div class="form-group">
+                                        <label>Quantidade de Horas</label>
+                                        <select id="quantidadeHorasEntrada">
+                                            <option value="1">1 hora</option>
+                                            <option value="2">2 horas</option>
+                                            <option value="3">3 horas</option>
+                                            <option value="4">4 horas</option>
+                                            <option value="6">6 horas</option>
+                                            <option value="8">8 horas (Diária)</option>
+                                            <option value="12">12 horas</option>
+                                            <option value="24">24 horas</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="opcaoFixoEntrada" style="display:none;">
+                                    <div class="form-group">
+                                        <label>Tempo de Permanência</label>
+                                        <select id="tempoFixoSelectEntrada">
+                                            <option value="1h">1 Hora</option>
+                                            <option value="2h">2 Horas</option>
+                                            <option value="4h">4 Horas</option>
+                                            <option value="8h">8 Horas (Diária corrida)</option>
+                                            <option value="1d">1 Diária</option>
+                                            <option value="7d">7 Dias (Semanal)</option>
+                                            <option value="30d">30 Dias (Mensal)</option>
+                                            <option value="1a">1 Ano (Anual)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="opcaoPeriodoEntrada" style="display:none;">
+                                    <div class="tempo-input-group">
+                                        <div class="form-group">
+                                            <label>Data/Hora Entrada</label>
+                                            <input type="datetime-local" id="dataEntradaPeriodoEntrada">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Data/Hora Saída</label>
+                                            <input type="datetime-local" id="dataSaidaPeriodoEntrada">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="valorPreviewEntrada" class="valor-preview" style="display:none;">
+                                    💰 Valor Estimado: R$ <span id="valorEstimadoEntrada">0,00</span>
+                                    <small id="tempoDescricaoEntrada"></small>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Observação (opcional)</label>
+                                <input type="text" id="observacaoMovimento" placeholder="Observações...">
+                            </div>
+
+                            <div class="actions">
+                                <button class="btn-success" onclick="registrarEntrada()">✅ Registrar Entrada</button>
+                                <button class="btn-ghost" onclick="limparVagaSelecionada()">🗑️ Limpar Seleção</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layout-stack">
+                        <div id="messageEntrada" class="message"></div>
+                        <div id="veiculoInfo" class="info-box" style="display:none;">
+                            <div class="info-title">Informações do Veículo</div>
+                            <div id="veiculoDetalhes"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="saida" class="tab-content">
+                <div class="page-header">
+                    <h2>Registrar Saída</h2>
+                    <p>Informe a placa do veículo. O valor será calculado pelo tempo de permanência ou pela reserva da entrada.</p>
+                </div>
+
+                <div class="layout-2">
+                    <div class="card">
+                        <div class="card-header">Dados da saída</div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Placa do Veículo *</label>
+                                <input type="text" id="placaSaida" placeholder="ABC-1234" onblur="buscarInfoSaida()">
+                            </div>
+                            <div class="actions">
+                                <button class="btn-danger" onclick="registrarSaida()">❌ Registrar Saída</button>
+                                <button class="btn-ghost" onclick="limparBuscaSaida()">🗑️ Limpar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layout-stack">
+                        <div id="messageSaida" class="message"></div>
+                        <div id="saidaInfo" class="info-box" style="display:none;">
+                            <div class="info-title">Informações da Permanência</div>
+                            <div id="saidaDetalhes"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="clientes" class="tab-content">
+                <div class="page-header">
+                    <h2>Cadastro de Clientes</h2>
+                    <p>Cadastre clientes para associá-los aos veículos.</p>
+                </div>
+
+                <div class="layout-2">
+                    <div class="card">
+                        <div class="card-header">Novo cliente</div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Nome Completo *</label>
+                                <input type="text" id="clienteNome" placeholder="Nome do cliente">
+                            </div>
+                            <div class="form-group">
+                                <label>CPF/CNPJ *</label>
+                                <input type="text" id="clienteDocumento" placeholder="000.000.000-00">
+                            </div>
+                            <div class="form-group">
+                                <label>Telefone</label>
+                                <input type="text" id="clienteTelefone" placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="clienteEmail" placeholder="email@exemplo.com">
+                            </div>
+                            <div class="actions">
+                                <button class="btn-success" onclick="cadastrarCliente()">💾 Cadastrar Cliente</button>
+                            </div>
+                            <div id="messageCliente" class="message"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">Clientes cadastrados</div>
+                        <div class="card-body compact">
+                            <div class="table-wrap">
+                                <table id="tabelaClientes">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>CPF/CNPJ</th>
+                                            <th>Telefone</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="veiculos" class="tab-content">
+                <div class="page-header">
+                    <h2>Cadastro de Veículos</h2>
+                    <p>Cadastre veículos e, se desejar, associe a um cliente.</p>
+                </div>
+
+                <div class="layout-2">
+                    <div class="card">
+                        <div class="card-header">Novo veículo</div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Placa *</label>
+                                <input type="text" id="veiculoPlaca" placeholder="ABC-1234">
+                            </div>
+                            <div class="form-group">
+                                <label>Modelo/Marca *</label>
+                                <input type="text" id="veiculoModelo" placeholder="Fiat Uno">
+                            </div>
+                            <div class="form-group">
+                                <label>Cor</label>
+                                <input type="text" id="veiculoCor" placeholder="Prata">
+                            </div>
+                            <div class="layout-3">
+                                <div class="form-group">
+                                    <label>Tipo</label>
+                                    <select id="veiculoTipo">
+                                        <option value="Carro">Carro</option>
+                                        <option value="Moto">Moto</option>
+                                        <option value="Caminhonete/SUV">Caminhonete/SUV</option>
+                                        <option value="Van/Utilitário">Van/Utilitário</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tamanho</label>
+                                    <select id="veiculoTamanho">
+                                        <option value="Pequeno">Pequeno</option>
+                                        <option value="Médio" selected>Médio</option>
+                                        <option value="Grande">Grande</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ano</label>
+                                    <input type="number" id="veiculoAno" placeholder="2020">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Cliente Associado</label>
+                                <select id="veiculoCliente">
+                                    <option value="">Nenhum</option>
+                                </select>
+                            </div>
+                            <div class="actions">
+                                <button class="btn-success" onclick="cadastrarVeiculo()">💾 Cadastrar Veículo</button>
+                            </div>
+                            <div id="messageVeiculo" class="message"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">Veículos cadastrados</div>
+                        <div class="card-body compact">
+                            <div class="table-wrap">
+                                <table id="tabelaVeiculos">
+                                    <thead>
+                                        <tr>
+                                            <th>Placa</th>
+                                            <th>Modelo/Cor</th>
+                                            <th>Tipo</th>
+                                            <th>Tam.</th>
+                                            <th>Ano</th>
+                                            <th>Cliente</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="precos" class="tab-content">
+                <div class="page-header">
+                    <h2>Tabela de Preços</h2>
+                    <p>Defina os valores usados no cálculo de tarifas de entrada e saída.</p>
+                </div>
+
+                <div class="layout-2">
+                    <div class="card">
+                        <div class="card-header">Editar preços</div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Preço por Hora (R$)</label>
+                                <input type="number" id="precoHora" step="0.01" value="5.00">
+                            </div>
+                            <div class="form-group">
+                                <label>Preço Diária (R$)</label>
+                                <input type="number" id="precoDiaria" step="0.01" value="80.00">
+                            </div>
+                            <div class="form-group">
+                                <label>Preço Mensal (R$)</label>
+                                <input type="number" id="precoMensal" step="0.01" value="1500.00">
+                            </div>
+                            <div class="form-group">
+                                <label>Preço Anual (R$)</label>
+                                <input type="number" id="precoAnual" step="0.01" value="15000.00">
+                            </div>
+                            <div class="actions">
+                                <button class="btn-primary" onclick="atualizarPrecos()">Atualizar Preços</button>
+                            </div>
+                            <div id="messagePrecos" class="message"></div>
+                        </div>
+                    </div>
+
+                    <div class="precos-box">
+                        <h3>Preços Vigentes</h3>
+                        <div class="preco-row">
+                            <span>💰 Hora</span>
+                            <span>R$ <span id="displayPrecoHora">5.00</span></span>
+                        </div>
+                        <div class="preco-row">
+                            <span>📅 Diária</span>
+                            <span>R$ <span id="displayPrecoDiaria">80.00</span></span>
+                        </div>
+                        <div class="preco-row">
+                            <span>📆 Mensal</span>
+                            <span>R$ <span id="displayPrecoMensal">1500.00</span></span>
+                        </div>
+                        <div class="preco-row">
+                            <span>🗓️ Anual</span>
+                            <span>R$ <span id="displayPrecoAnual">15000.00</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="relatorios" class="tab-content">
+                <div class="page-header">
+                    <h2>Relatórios</h2>
+                    <p>Visão geral de ocupação, faturamento e movimentações recentes.</p>
+                </div>
+
+                <div class="layout-2" style="margin-bottom: 20px;">
+                    <div class="card">
+                        <div class="card-header">Ocupação</div>
+                        <div class="card-body">
+                            <div id="relatorioOcupacao" class="report-cards"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">Faturamento</div>
+                        <div class="card-body">
+                            <div id="relatorioFaturamento" class="report-cards"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layout-2" style="margin-bottom: 20px;">
+                    <div class="card">
+                        <div class="card-header">Ocupação por Tipo de Vaga</div>
+                        <div class="card-body">
+                            <div id="relatorioTipoVaga" class="report-cards"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">Veículos por Tipo</div>
+                        <div class="card-body">
+                            <div id="relatorioTipoVeiculo" class="report-cards"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Movimentações Recentes</div>
+                    <div class="card-body compact">
+                        <div class="table-wrap">
+                            <table id="tabelaMovimentacoes">
+                                <thead>
+                                    <tr>
+                                        <th>Placa</th>
+                                        <th>Vaga</th>
+                                        <th>Entrada</th>
+                                        <th>Saída</th>
+                                        <th>Valor</th>
+                                        <th>Tempo Reservado</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        let clients = JSON.parse(localStorage.getItem('clients')) || [];
+        let vehicles = JSON.parse(localStorage.getItem('vehicles')) || [];
+        let movements = JSON.parse(localStorage.getItem('movements')) || [];
+        let currentSpots = [];
+        let prices = JSON.parse(localStorage.getItem('prices')) || { hora: 5.00, diaria: 80.00, mensal: 1500.00, anual: 15000.00 };
+        let selectedSpot = null;
+
+        const TOTAL_VAGAS = 30;
+        const QTD_PREFERENCIAIS = 4;
+        const QTD_IDOSO = 3;
+
+        function generateSpots() {
+            let spots = [];
+            for (let i = 1; i <= TOTAL_VAGAS; i++) {
+                let type = 'normal';
+                if (i <= QTD_PREFERENCIAIS) type = 'preferencial';
+                else if (i <= QTD_PREFERENCIAIS + QTD_IDOSO) type = 'idoso';
+                spots.push({
+                    number: i,
+                    type: type,
+                    status: 'available',
+                    placa: null,
+                    entrada: null,
+                    tempoReservado: null,
+                    valorReserva: null,
+                    saidaProgramada: null
+                });
+            }
+            return spots;
+        }
+
+        let savedSpots = localStorage.getItem('spots');
+        if (savedSpots) {
+            currentSpots = JSON.parse(savedSpots);
+            if (currentSpots.length !== TOTAL_VAGAS) {
+                currentSpots = generateSpots();
+                localStorage.setItem('spots', JSON.stringify(currentSpots));
+            }
+        } else {
+            currentSpots = generateSpots();
+            localStorage.setItem('spots', JSON.stringify(currentSpots));
+        }
+
+        function calcularValorPorTempoEntrada(tipoTempo, valor) {
+            const precoHora = prices.hora;
+            const precoDiaria = prices.diaria;
+            const precoMensal = prices.mensal;
+            const precoAnual = prices.anual;
+
+            if (tipoTempo === 'hora') {
+                const horas = parseInt(valor);
+                if (horas >= 24) {
+                    const dias = Math.floor(horas / 24);
+                    return dias * precoDiaria + (horas % 24) * precoHora;
+                }
+                return horas * precoHora;
+            } else if (tipoTempo === 'fixo') {
+                const tempo = valor;
+                if (tempo === '30d') return precoMensal;
+                if (tempo === '1a') return precoAnual;
+                if (tempo.endsWith('h')) return parseInt(tempo) * precoHora;
+                if (tempo.endsWith('d')) return parseInt(tempo) * precoDiaria;
+            } else if (tipoTempo === 'periodo') {
+                const entrada = new Date(valor.entrada);
+                const saida = new Date(valor.saida);
+                const diffHoras = Math.ceil((saida - entrada) / (1000 * 60 * 60));
+                if (diffHoras >= 8760) {
+                    const anos = Math.floor(diffHoras / 8760);
+                    const restoHoras = diffHoras % 8760;
+                    const restoDias = Math.floor(restoHoras / 24);
+                    return anos * precoAnual + restoDias * precoDiaria + (restoHoras % 24) * precoHora;
+                }
+                if (diffHoras >= 24) {
+                    const dias = Math.floor(diffHoras / 24);
+                    return dias * precoDiaria + (diffHoras % 24) * precoHora;
+                }
+                return Math.max(0, diffHoras) * precoHora;
+            }
+            return 0;
+        }
+
+        function atualizarPreviewValorEntrada() {
+            const radio = document.querySelector('input[name="tempoTipoEntrada"]:checked');
+            if (!radio) return;
+            const tempoTipo = radio.value;
+            let valor = 0;
+            let descricao = '';
+
+            if (tempoTipo === 'hora') {
+                const horas = document.getElementById('quantidadeHorasEntrada').value;
+                valor = calcularValorPorTempoEntrada('hora', horas);
+                descricao = `${horas} hora(s) no estacionamento`;
+            } else if (tempoTipo === 'fixo') {
+                const tempo = document.getElementById('tempoFixoSelectEntrada').value;
+                valor = calcularValorPorTempoEntrada('fixo', tempo);
+                descricao = `Tempo fixo: ${tempo}`;
+            } else if (tempoTipo === 'periodo') {
+                const entrada = document.getElementById('dataEntradaPeriodoEntrada').value;
+                const saida = document.getElementById('dataSaidaPeriodoEntrada').value;
+                if (entrada && saida) {
+                    valor = calcularValorPorTempoEntrada('periodo', { entrada, saida });
+                    descricao = `Período: ${new Date(entrada).toLocaleString()} até ${new Date(saida).toLocaleString()}`;
+                }
+            }
+
+            document.getElementById('valorEstimadoEntrada').innerText = valor.toFixed(2);
+            document.getElementById('tempoDescricaoEntrada').innerText = descricao;
+            document.getElementById('valorPreviewEntrada').style.display = valor > 0 ? 'block' : 'none';
+        }
+
+        document.addEventListener('change', function (e) {
+            if (['tempoPorHoraEntrada', 'tempoFixoEntrada', 'tempoPeriodoEntrada'].includes(e.target.id)) {
+                document.getElementById('opcaoHoraEntrada').style.display = e.target.id === 'tempoPorHoraEntrada' ? 'block' : 'none';
+                document.getElementById('opcaoFixoEntrada').style.display = e.target.id === 'tempoFixoEntrada' ? 'block' : 'none';
+                document.getElementById('opcaoPeriodoEntrada').style.display = e.target.id === 'tempoPeriodoEntrada' ? 'block' : 'none';
+                atualizarPreviewValorEntrada();
+            }
+            if (['quantidadeHorasEntrada', 'tempoFixoSelectEntrada', 'dataEntradaPeriodoEntrada', 'dataSaidaPeriodoEntrada'].includes(e.target.id)) {
+                atualizarPreviewValorEntrada();
+            }
+        });
+
+        function renderSpotCard(spot) {
+            const classes = `spot ${spot.status} ${spot.type}`;
+            const icone = spot.type === 'preferencial' ? '⭐' : (spot.type === 'idoso' ? '👴' : '🅿️');
+            return `
+                <div class="${classes}" onclick="selecionarVaga(${spot.number})">
+                    <div class="spot-number">${icone} ${spot.number}</div>
+                    <div class="spot-status">${spot.status === 'available' ? 'Livre' : (spot.placa || 'Ocupada')}</div>
+                </div>
+            `;
+        }
+
+        function renderParkingSpots() {
+            const preferenciais = currentSpots.filter(s => s.type === 'preferencial');
+            const idosos = currentSpots.filter(s => s.type === 'idoso');
+            const normais = currentSpots.filter(s => s.type === 'normal');
+
+            document.getElementById('parkingSpotsContainer').innerHTML = `
+                <div class="parking-section">
+                    <div class="parking-title">⭐ Preferenciais (${preferenciais.length})</div>
+                    <div class="parking-spots">${preferenciais.map(spot => renderSpotCard(spot)).join('')}</div>
+                </div>
+                <div class="parking-section">
+                    <div class="parking-title">👴 Idoso (${idosos.length})</div>
+                    <div class="parking-spots">${idosos.map(spot => renderSpotCard(spot)).join('')}</div>
+                </div>
+                <div class="parking-section">
+                    <div class="parking-title">🅿️ Normais (${normais.length})</div>
+                    <div class="parking-spots">${normais.map(spot => renderSpotCard(spot)).join('')}</div>
+                </div>
+            `;
+        }
+
+        function selecionarVaga(numero) {
+            const spot = currentSpots.find(s => s.number === numero);
+            if (spot.status === 'available') {
+                selectedSpot = spot;
+                showTabByCode('entrada');
+                document.getElementById('selectedSpotInfo').style.display = 'block';
+                document.getElementById('selectedSpotInfo').innerText = `Vaga selecionada: Nº ${spot.number} (${spot.type})`;
+            } else {
+                showTabByCode('saida');
+                document.getElementById('placaSaida').value = spot.placa || '';
+                buscarInfoSaida();
+                mostrarMensagem('saida', `Vaga ${numero} está ocupada por ${spot.placa}`, 'info');
+            }
+        }
+
+        function limparVagaSelecionada() {
+            selectedSpot = null;
+            document.getElementById('selectedSpotInfo').style.display = 'none';
+            document.getElementById('placaEntrada').value = '';
+            document.getElementById('valorPreviewEntrada').style.display = 'none';
+            document.getElementById('veiculoInfo').style.display = 'none';
+            document.getElementById('observacaoMovimento').value = '';
+        }
+
+        function buscarVeiculoPorPlaca() {
+            const placa = document.getElementById('placaEntrada').value.toUpperCase();
+            const veiculo = vehicles.find(v => v.placa === placa);
+            const veiculoInfoDiv = document.getElementById('veiculoInfo');
+
+            if (veiculo) {
+                const cliente = clients.find(c => c.id == veiculo.clienteId);
+                document.getElementById('veiculoDetalhes').innerHTML = `
+                    <p><strong>Modelo:</strong> ${veiculo.modelo}</p>
+                    <p><strong>Cor:</strong> ${veiculo.cor || '-'}</p>
+                    <p><strong>Tipo:</strong> ${veiculo.tipo || '-'}</p>
+                    <p><strong>Tamanho:</strong> ${veiculo.tamanho || '-'}</p>
+                    <p><strong>Ano:</strong> ${veiculo.ano || '-'}</p>
+                    ${cliente ? `<p><strong>Cliente:</strong> ${cliente.nome}</p>` : ''}
+                `;
+                veiculoInfoDiv.style.display = 'block';
+            } else if (placa) {
+                veiculoInfoDiv.style.display = 'none';
+                mostrarMensagem('entrada', 'Veículo não cadastrado! Cadastre-o na aba Veículos.', 'error');
+            } else {
+                veiculoInfoDiv.style.display = 'none';
+            }
+        }
+
+        function buscarInfoSaida() {
+            const placa = document.getElementById('placaSaida').value.toUpperCase();
+            const saidaInfoDiv = document.getElementById('saidaInfo');
+            if (!placa) {
+                saidaInfoDiv.style.display = 'none';
+                return;
+            }
+
+            const spot = currentSpots.find(s => s.placa === placa && s.status === 'occupied');
+            if (spot) {
+                const veiculo = vehicles.find(v => v.placa === placa);
+                const entrada = new Date(spot.entrada);
+                const horasDecorridas = Math.max(1, Math.ceil((new Date() - entrada) / (1000 * 60 * 60)));
+                document.getElementById('saidaDetalhes').innerHTML = `
+                    <p><strong>Vaga:</strong> ${spot.number} (${spot.type})</p>
+                    <p><strong>Entrada:</strong> ${entrada.toLocaleString()}</p>
+                    <p><strong>Tempo decorrido:</strong> ~${horasDecorridas} hora(s)</p>
+                    ${spot.tempoReservado ? `<p><strong>Tempo reservado:</strong> ${spot.tempoReservado}</p>` : ''}
+                    ${spot.valorReserva ? `<p><strong>Valor a cobrar (reserva):</strong> R$ ${spot.valorReserva.toFixed(2)}</p>` : ''}
+                    ${veiculo ? `<p><strong>Veículo:</strong> ${veiculo.modelo} - ${veiculo.cor || '-'}</p>` : ''}
+                `;
+                saidaInfoDiv.style.display = 'block';
+            } else {
+                saidaInfoDiv.style.display = 'none';
+                mostrarMensagem('saida', 'Nenhum veículo com essa placa está ocupando uma vaga no momento.', 'error');
+            }
+        }
+
+        function limparBuscaSaida() {
+            document.getElementById('placaSaida').value = '';
+            document.getElementById('saidaInfo').style.display = 'none';
+        }
+
+        function registrarEntrada() {
+            const placa = document.getElementById('placaEntrada').value.toUpperCase();
+            if (!placa) {
+                mostrarMensagem('entrada', 'Informe a placa!', 'error');
+                return;
+            }
+
+            if (currentSpots.find(s => s.placa === placa && s.status === 'occupied')) {
+                mostrarMensagem('entrada', 'Esta placa já está registrada em outra vaga!', 'error');
+                return;
+            }
+
+            const tempoTipo = document.querySelector('input[name="tempoTipoEntrada"]:checked').value;
+            let tempoReservado = '';
+            let valorReserva = 0;
+            let saidaProgramada = null;
+
+            if (tempoTipo === 'hora') {
+                const horas = document.getElementById('quantidadeHorasEntrada').value;
+                tempoReservado = `${horas} hora(s)`;
+                valorReserva = calcularValorPorTempoEntrada('hora', horas);
+                const agora = new Date();
+                saidaProgramada = new Date(agora.getTime() + (parseInt(horas) * 60 * 60 * 1000)).toISOString();
+            } else if (tempoTipo === 'fixo') {
+                const tempo = document.getElementById('tempoFixoSelectEntrada').value;
+                tempoReservado = tempo;
+                valorReserva = calcularValorPorTempoEntrada('fixo', tempo);
+                const agora = new Date();
+                let horas = 0;
+                if (tempo === '30d') horas = 30 * 24;
+                else if (tempo === '1a') horas = 8760;
+                else if (tempo.endsWith('h')) horas = parseInt(tempo);
+                else if (tempo.endsWith('d')) horas = parseInt(tempo) * 24;
+                saidaProgramada = new Date(agora.getTime() + (horas * 60 * 60 * 1000)).toISOString();
+            } else if (tempoTipo === 'periodo') {
+                const entrada = document.getElementById('dataEntradaPeriodoEntrada').value;
+                const saida = document.getElementById('dataSaidaPeriodoEntrada').value;
+                if (entrada && saida) {
+                    tempoReservado = `${new Date(entrada).toLocaleString()} até ${new Date(saida).toLocaleString()}`;
+                    valorReserva = calcularValorPorTempoEntrada('periodo', { entrada, saida });
+                    saidaProgramada = saida;
+                }
+            }
+
+            let targetSpot = selectedSpot;
+            if (!targetSpot) {
+                const tipoVaga = document.getElementById('tipoVagaMovimento').value;
+                targetSpot = currentSpots.find(s => s.status === 'available' && s.type === tipoVaga);
+                if (!targetSpot) {
+                    mostrarMensagem('entrada', `Não há vagas ${tipoVaga}s disponíveis!`, 'error');
+                    return;
+                }
+            }
+
+            targetSpot.status = 'occupied';
+            targetSpot.placa = placa;
+            targetSpot.entrada = new Date().toISOString();
+            targetSpot.tempoReservado = tempoReservado;
+            targetSpot.valorReserva = valorReserva;
+            targetSpot.saidaProgramada = saidaProgramada;
+
+            movements.push({
+                id: Date.now(),
+                placa: placa,
+                vaga: targetSpot.number,
+                tipoVaga: targetSpot.type,
+                entrada: new Date().toLocaleString(),
+                saida: null,
+                valor: valorReserva > 0 ? valorReserva.toFixed(2) : null,
+                tempoReservado: tempoReservado,
+                observacao: document.getElementById('observacaoMovimento').value || null
+            });
+
+            saveData();
+            renderParkingSpots();
+            updateStats();
+            updateReports();
+            const numeroVaga = targetSpot.number;
+            limparVagaSelecionada();
+            mostrarMensagem('entrada', `✅ Entrada registrada na vaga ${numeroVaga} — Valor: R$ ${valorReserva.toFixed(2)}`, 'success');
+        }
+
+        function registrarSaida() {
+            const placa = document.getElementById('placaSaida').value.toUpperCase();
+            if (!placa) {
+                mostrarMensagem('saida', 'Informe a placa!', 'error');
+                return;
+            }
+
+            const spot = currentSpots.find(s => s.placa === placa && s.status === 'occupied');
+            if (!spot) {
+                mostrarMensagem('saida', 'Veículo não encontrado em nenhuma vaga ocupada!', 'error');
+                return;
+            }
+
+            const entrada = new Date(spot.entrada);
+            const saida = new Date();
+            const horas = Math.max(1, Math.ceil((saida - entrada) / (1000 * 60 * 60)));
+            let valor = horas * prices.hora;
+
+            if (horas >= 8 && horas < 24) {
+                valor = Math.min(valor, prices.diaria);
+            } else if (horas >= 24) {
+                const dias = Math.floor(horas / 24);
+                valor = dias * prices.diaria + (horas % 24) * prices.hora;
+            }
+
+            if (spot.valorReserva && spot.valorReserva > 0) {
+                valor = spot.valorReserva;
+            }
+
+            spot.status = 'available';
+            spot.placa = null;
+            spot.entrada = null;
+            spot.tempoReservado = null;
+            spot.valorReserva = null;
+            spot.saidaProgramada = null;
+
+            const movement = movements.find(m => m.placa === placa && !m.saida);
+            if (movement) {
+                movement.saida = saida.toLocaleString();
+                movement.valor = valor.toFixed(2);
+            }
+
+            saveData();
+            renderParkingSpots();
+            updateStats();
+            updateReports();
+            mostrarMensagem('saida', `❌ Saída registrada. Valor: R$ ${valor.toFixed(2)}`, 'success');
+            limparBuscaSaida();
+        }
+
+        function cadastrarCliente() {
+            const cliente = {
+                id: Date.now(),
+                nome: document.getElementById('clienteNome').value,
+                documento: document.getElementById('clienteDocumento').value,
+                telefone: document.getElementById('clienteTelefone').value,
+                email: document.getElementById('clienteEmail').value,
+                dataCadastro: new Date().toLocaleDateString('pt-BR')
+            };
+
+            if (!cliente.nome || !cliente.documento) {
+                mostrarMensagem('cliente', 'Preencha nome e documento!', 'error');
+                return;
+            }
+
+            if (clients.find(c => c.documento === cliente.documento)) {
+                mostrarMensagem('cliente', 'Já existe cliente com este documento!', 'error');
+                return;
+            }
+
+            clients.push(cliente);
+            saveData();
+            renderClientes();
+            atualizarSelectClientes();
+            limparFormCliente();
+            mostrarMensagem('cliente', 'Cliente cadastrado!', 'success');
+            updateStats();
+        }
+
+        function renderClientes() {
+            const tbody = document.querySelector('#tabelaClientes tbody');
+            tbody.innerHTML = clients.map(c => `
+                <tr>
+                    <td>${c.nome}</td>
+                    <td>${c.documento}</td>
+                    <td>${c.telefone || '-'}</td>
+                    <td><button class="btn-danger btn-sm" onclick="excluirCliente(${c.id})">🗑️</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function excluirCliente(id) {
+            if (confirm('Excluir cliente?')) {
+                clients = clients.filter(c => c.id !== id);
+                saveData();
+                renderClientes();
+                atualizarSelectClientes();
+                mostrarMensagem('cliente', 'Cliente excluído!', 'success');
+            }
+        }
+
+        function limparFormCliente() {
+            document.getElementById('clienteNome').value = '';
+            document.getElementById('clienteDocumento').value = '';
+            document.getElementById('clienteTelefone').value = '';
+            document.getElementById('clienteEmail').value = '';
+        }
+
+        function cadastrarVeiculo() {
+            const veiculo = {
+                placa: document.getElementById('veiculoPlaca').value.toUpperCase(),
+                modelo: document.getElementById('veiculoModelo').value,
+                cor: document.getElementById('veiculoCor').value,
+                tipo: document.getElementById('veiculoTipo').value,
+                tamanho: document.getElementById('veiculoTamanho').value,
+                ano: document.getElementById('veiculoAno').value,
+                clienteId: document.getElementById('veiculoCliente').value || null,
+                dataCadastro: new Date().toLocaleString()
+            };
+
+            if (!veiculo.placa || !veiculo.modelo) {
+                mostrarMensagem('veiculo', 'Preencha placa e modelo!', 'error');
+                return;
+            }
+
+            if (vehicles.find(v => v.placa === veiculo.placa)) {
+                mostrarMensagem('veiculo', 'Veículo já cadastrado (placa duplicada)!', 'error');
+                return;
+            }
+
+            vehicles.push(veiculo);
+            saveData();
+            renderVeiculos();
+            atualizarSelectClientes();
+            mostrarMensagem('veiculo', 'Veículo cadastrado!', 'success');
+            limparFormVeiculo();
+        }
+
+        function renderVeiculos() {
+            const tbody = document.querySelector('#tabelaVeiculos tbody');
+            tbody.innerHTML = vehicles.map(v => {
+                const cliente = clients.find(c => c.id == v.clienteId);
+                return `
+                    <tr>
+                        <td>${v.placa}</td>
+                        <td>${v.modelo} - ${v.cor || '-'}</td>
+                        <td>${v.tipo || '-'}</td>
+                        <td>${v.tamanho || '-'}</td>
+                        <td>${v.ano || '-'}</td>
+                        <td>${cliente ? cliente.nome : '-'}</td>
+                        <td><button class="btn-danger btn-sm" onclick="removerVeiculo('${v.placa}')">🗑️</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function removerVeiculo(placa) {
+            if (confirm('Remover veículo?')) {
+                vehicles = vehicles.filter(v => v.placa !== placa);
+                saveData();
+                renderVeiculos();
+                mostrarMensagem('veiculo', 'Veículo removido!', 'success');
+            }
+        }
+
+        function limparFormVeiculo() {
+            document.getElementById('veiculoPlaca').value = '';
+            document.getElementById('veiculoModelo').value = '';
+            document.getElementById('veiculoCor').value = '';
+            document.getElementById('veiculoAno').value = '';
+        }
+
+        function atualizarSelectClientes() {
+            const select = document.getElementById('veiculoCliente');
+            select.innerHTML = '<option value="">Nenhum</option>' +
+                clients.map(c => `<option value="${c.id}">${c.nome} - ${c.documento}</option>`).join('');
+        }
+
+        function atualizarPrecos() {
+            prices.hora = parseFloat(document.getElementById('precoHora').value) || 0;
+            prices.diaria = parseFloat(document.getElementById('precoDiaria').value) || 0;
+            prices.mensal = parseFloat(document.getElementById('precoMensal').value) || 0;
+            prices.anual = parseFloat(document.getElementById('precoAnual').value) || 0;
+
+            document.getElementById('displayPrecoHora').innerText = prices.hora.toFixed(2);
+            document.getElementById('displayPrecoDiaria').innerText = prices.diaria.toFixed(2);
+            document.getElementById('displayPrecoMensal').innerText = prices.mensal.toFixed(2);
+            document.getElementById('displayPrecoAnual').innerText = prices.anual.toFixed(2);
+
+            saveData();
+            mostrarMensagem('precos', 'Preços atualizados!', 'success');
+            atualizarPreviewValorEntrada();
+        }
+
+        function updateReports() {
+            const ocupados = currentSpots.filter(s => s.status === 'occupied').length;
+            const total = currentSpots.length;
+            document.getElementById('relatorioOcupacao').innerHTML = `
+                <div class="report-chip">📊 Ocupação: ${Math.round(ocupados / total * 100)}%</div>
+                <div class="report-chip">🟢 Livres: ${total - ocupados}</div>
+                <div class="report-chip">🔴 Ocupadas: ${ocupados}</div>
+            `;
+
+            const totalFaturado = movements.filter(m => m.valor).reduce((sum, m) => sum + parseFloat(m.valor), 0);
+            document.getElementById('relatorioFaturamento').innerHTML = `
+                <div class="report-chip">💰 Total: R$ ${totalFaturado.toFixed(2)}</div>
+                <div class="report-chip">🚗 Movimentações: ${movements.length}</div>
+            `;
+
+            const porTipo = ['preferencial', 'idoso', 'normal'].map(tipo => {
+                const vagasTipo = currentSpots.filter(s => s.type === tipo);
+                const ocupadasTipo = vagasTipo.filter(s => s.status === 'occupied').length;
+                return `<div class="report-chip">${tipo}: ${ocupadasTipo}/${vagasTipo.length}</div>`;
+            }).join('');
+            document.getElementById('relatorioTipoVaga').innerHTML = porTipo;
+
+            const tiposVeiculo = {};
+            vehicles.forEach(v => {
+                tiposVeiculo[v.tipo || 'Não informado'] = (tiposVeiculo[v.tipo || 'Não informado'] || 0) + 1;
+            });
+            document.getElementById('relatorioTipoVeiculo').innerHTML = Object.keys(tiposVeiculo).length
+                ? Object.entries(tiposVeiculo).map(([tipo, qtd]) => `<div class="report-chip">${tipo}: ${qtd}</div>`).join('')
+                : '<p style="color:#8b92a0;font-size:0.85rem;">Nenhum veículo cadastrado ainda.</p>';
+
+            const tbody = document.querySelector('#tabelaMovimentacoes tbody');
+            tbody.innerHTML = movements.slice(-15).reverse().map(m => `
+                <tr>
+                    <td>${m.placa}</td>
+                    <td>${m.vaga || '-'} (${m.tipoVaga || '-'})</td>
+                    <td>${m.entrada}</td>
+                    <td>${m.saida || 'Em andamento'}</td>
+                    <td>${m.valor ? 'R$ ' + m.valor : '-'}</td>
+                    <td>${m.tempoReservado || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function aplicarFiltroVagas() {
+            const placa = document.getElementById('filtroPlaca').value.toUpperCase();
+            const status = document.getElementById('filtroStatus').value;
+            const tipo = document.getElementById('filtroTipo').value;
+
+            let filtered = [...currentSpots];
+            if (placa) filtered = filtered.filter(s => s.placa && s.placa.includes(placa));
+            if (status) filtered = filtered.filter(s => s.status === status);
+            if (tipo) filtered = filtered.filter(s => s.type === tipo);
+
+            const preferenciais = filtered.filter(s => s.type === 'preferencial');
+            const idosos = filtered.filter(s => s.type === 'idoso');
+            const normais = filtered.filter(s => s.type === 'normal');
+
+            document.getElementById('parkingSpotsContainer').innerHTML = `
+                <div class="parking-section">
+                    <div class="parking-title">⭐ Preferenciais (${preferenciais.length})</div>
+                    <div class="parking-spots">${preferenciais.map(spot => renderSpotCard(spot)).join('')}</div>
+                </div>
+                <div class="parking-section">
+                    <div class="parking-title">👴 Idoso (${idosos.length})</div>
+                    <div class="parking-spots">${idosos.map(spot => renderSpotCard(spot)).join('')}</div>
+                </div>
+                <div class="parking-section">
+                    <div class="parking-title">🅿️ Normais (${normais.length})</div>
+                    <div class="parking-spots">${normais.map(spot => renderSpotCard(spot)).join('')}</div>
+                </div>
+            `;
+        }
+
+        function limparFiltroVagas() {
+            document.getElementById('filtroPlaca').value = '';
+            document.getElementById('filtroStatus').value = '';
+            document.getElementById('filtroTipo').value = '';
+            renderParkingSpots();
+        }
+
+        function mostrarMensagem(contexto, mensagem, tipo) {
+            const id = `message${contexto.charAt(0).toUpperCase() + contexto.slice(1)}`;
+            const msgDiv = document.getElementById(id);
+            if (msgDiv) {
+                msgDiv.textContent = mensagem;
+                msgDiv.className = `message ${tipo}`;
+                msgDiv.style.display = 'block';
+                setTimeout(() => { msgDiv.style.display = 'none'; }, 3500);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('clients', JSON.stringify(clients));
+            localStorage.setItem('vehicles', JSON.stringify(vehicles));
+            localStorage.setItem('movements', JSON.stringify(movements));
+            localStorage.setItem('spots', JSON.stringify(currentSpots));
+            localStorage.setItem('prices', JSON.stringify(prices));
+        }
+
+        function updateStats() {
+            const total = currentSpots.length;
+            const ocupadas = currentSpots.filter(s => s.status === 'occupied').length;
+            const livres = total - ocupadas;
+            const prefLivres = currentSpots.filter(s => s.type === 'preferencial' && s.status === 'available').length;
+            const idosoLivres = currentSpots.filter(s => s.type === 'idoso' && s.status === 'available').length;
+            const hoje = new Date().toLocaleDateString();
+            const faturamentoHoje = movements
+                .filter(m => m.valor && m.entrada && m.entrada.startsWith(hoje))
+                .reduce((sum, m) => sum + parseFloat(m.valor), 0);
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-item"><div class="label">Total de Vagas</div><div class="value">${total}</div></div>
+                <div class="stat-item"><div class="label">Disponíveis</div><div class="value accent">${livres}</div></div>
+                <div class="stat-item"><div class="label">Ocupadas</div><div class="value">${ocupadas}</div></div>
+                <div class="stat-item"><div class="label">Pref. Livres</div><div class="value">${prefLivres}</div></div>
+                <div class="stat-item"><div class="label">Idoso Livres</div><div class="value">${idosoLivres}</div></div>
+                <div class="stat-item"><div class="label">Faturamento Hoje</div><div class="value">R$ ${faturamentoHoje.toFixed(0)}</div></div>
+            `;
+        }
+
+        function showTabByCode(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            const idx = ['vagas', 'entrada', 'saida', 'clientes', 'veiculos', 'precos', 'relatorios'].indexOf(tabId);
+            const btns = document.querySelectorAll('.tab-btn');
+            if (btns[idx]) btns[idx].classList.add('active');
+
+            if (tabId === 'relatorios') updateReports();
+            if (tabId === 'clientes') renderClientes();
+            if (tabId === 'veiculos') renderVeiculos();
+            if (tabId === 'vagas') renderParkingSpots();
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
+
+            if (tabId === 'relatorios') updateReports();
+            if (tabId === 'clientes') renderClientes();
+            if (tabId === 'veiculos') renderVeiculos();
+            if (tabId === 'vagas') renderParkingSpots();
+        }
+
+        function init() {
+            renderParkingSpots();
+            updateStats();
+            renderClientes();
+            renderVeiculos();
+            updateReports();
+            atualizarSelectClientes();
+            document.getElementById('precoHora').value = prices.hora.toFixed(2);
+            document.getElementById('precoDiaria').value = prices.diaria.toFixed(2);
+            document.getElementById('precoMensal').value = prices.mensal.toFixed(2);
+            document.getElementById('precoAnual').value = prices.anual.toFixed(2);
+            document.getElementById('displayPrecoHora').innerText = prices.hora.toFixed(2);
+            document.getElementById('displayPrecoDiaria').innerText = prices.diaria.toFixed(2);
+            document.getElementById('displayPrecoMensal').innerText = prices.mensal.toFixed(2);
+            document.getElementById('displayPrecoAnual').innerText = prices.anual.toFixed(2);
+
+            document.getElementById('opcaoHoraEntrada').style.display = 'block';
+            document.getElementById('opcaoFixoEntrada').style.display = 'none';
+            document.getElementById('opcaoPeriodoEntrada').style.display = 'none';
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
